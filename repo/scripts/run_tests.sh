@@ -33,6 +33,19 @@ if ! docker compose ps --status=running --services 2>/dev/null | grep -q '^app$'
   done
 fi
 
+# The production image is built with `composer install --no-dev`, so phpunit
+# (require-dev) isn't in the vendor/ baked into the image. A fresh `app-vendor`
+# volume inherits that phpunit-less state on first boot. Install dev deps now
+# so the mounted volume carries phpunit; subsequent runs skip the install.
+if ! docker compose exec -T app test -x vendor/bin/phpunit 2>/dev/null; then
+  echo "[run_tests] installing PHP dev dependencies (phpunit)..."
+  docker compose exec -T app composer install --no-interaction --no-progress --prefer-dist
+  # composer wipes vendor/services.php during install; regenerate it so
+  # ThinkPHP discovers the migration service (otherwise `php think migrate:run`
+  # below fails with "no commands in the 'migrate' namespace").
+  docker compose exec -T app php think service:discover >/dev/null
+fi
+
 echo "[run_tests] ensuring test database '$TEST_DB' exists + migrated..."
 # CREATE DATABASE and GRANT require root; studio user can then migrate.
 docker compose exec -T -e TEST_DB="$TEST_DB" -e ROOT_PASS="$ROOT_PASS" -e DB_USER="$DB_USER" app php -r '
