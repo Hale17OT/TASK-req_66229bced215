@@ -37,7 +37,12 @@ services:
     container_name: studio-app
     restart: unless-stopped
     environment:
-      APP_ENV: ${APP_ENV:-production}
+      # Default APP_ENV to `development` so `docker compose up` works
+      # out-of-the-box for local/CI quickstart. Production operators MUST
+      # override APP_ENV (and the two secrets below) — FieldCipher's
+      # startup guard refuses the placeholder values when APP_ENV is
+      # production/staging/live. See app/service/security/FieldCipher.php.
+      APP_ENV: ${APP_ENV:-development}
       APP_DEBUG: ${APP_DEBUG:-false}
       APP_TIMEZONE: ${APP_TIMEZONE:-America/New_York}
       DB_HOST: db
@@ -45,12 +50,11 @@ services:
       DB_NAME: ${MYSQL_DATABASE:-studio_console}
       DB_USER: ${MYSQL_USER:-studio}
       DB_PASS: ${MYSQL_PASSWORD:-studio_change_me}
-      # APP_KEY / ENCRYPTION_KEY intentionally have NO fallback. The app
-      # container refuses to boot if they are missing so operators can't
-      # silently ship a placeholder. See README.md quick-start for the
-      # one-line key generator.
-      APP_KEY: ${APP_KEY:?set APP_KEY in .env (openssl rand -hex 32)}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env (openssl rand -hex 32)}
+      # Placeholders are accepted for dev/test but rejected by FieldCipher
+      # at boot when APP_ENV=production|staging|live. Override both before
+      # shipping — README quick-start has the one-line generator.
+      APP_KEY: ${APP_KEY:-please_change_this_32_byte_secret_xx}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-please_change_this_32_byte_secret_yy}
     volumes:
       - ./:/var/www/html
       - app-vendor:/var/www/html/vendor

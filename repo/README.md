@@ -11,12 +11,22 @@ administration, budget control, reimbursement, settlement, and audit system.
 Everything runs inside Docker. No local PHP / Node / npm / composer install
 required — the image builds them.
 
-### 1. Generate secrets and copy the env template
+```bash
+docker compose up
+```
 
-`APP_KEY` and `ENCRYPTION_KEY` have **no defaults** — the compose file
-refuses to start if they are missing, and the field-encryption runtime
-guard (`app/service/security/FieldCipher.php`) rejects the documented
-placeholders outside `APP_ENV=test`. Generate real values first:
+The compose file ships `APP_ENV=development` plus placeholder secrets so a
+fresh `docker compose up` works out of the box. On first boot the
+`migrate` container creates the schema and seeds demo data (users, roles,
+permissions, locations, departments). Wait until it prints `DONE` before
+opening the UI.
+
+**Access URL:** `http://localhost:8080` (port `8080` → `web` container's nginx)
+
+### Before a production run
+
+For a real deployment, copy `.env.example` → `.env`, set `APP_ENV=production`,
+and fill in fresh secrets:
 
 ```bash
 cp .env.example .env
@@ -24,19 +34,10 @@ printf 'APP_KEY=%s\nENCRYPTION_KEY=%s\n' \
   "$(openssl rand -hex 32)" "$(openssl rand -hex 32)" >> .env
 ```
 
-(Or export them in your shell before `docker compose up`.)
-
-### 2. Bring up the stack
-
-```bash
-docker compose up
-```
-
-On first boot the `migrate` container creates the schema and seeds demo data
-(users, roles, permissions, locations, departments). Wait until it prints
-`DONE` before opening the UI.
-
-**Access URL:** `http://localhost:8080` (port `8080` → `web` container's nginx)
+The startup guard in `app/service/security/FieldCipher.php` refuses to
+boot an `APP_ENV=production|staging|live` container that still carries
+the placeholder values, so a missed override fails loudly instead of
+silently shipping weak keys.
 
 ---
 

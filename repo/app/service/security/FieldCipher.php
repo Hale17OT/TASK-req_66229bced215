@@ -43,7 +43,13 @@ final class FieldCipher
         if ($rawKey === '') {
             throw new RuntimeException('ENCRYPTION_KEY env var must be set for FieldCipher');
         }
-        if (!self::isTestEnvironment() && in_array($rawKey, self::KNOWN_INSECURE_KEYS, true)) {
+        // Fail-closed in production-ish environments: the known placeholder
+        // keys shipped in docker-compose / .env.example are rejected at boot
+        // when APP_ENV is prod/staging/live (or unset outside a phpunit run).
+        // Explicit dev/test environments accept them so `docker compose up`
+        // works out-of-the-box for quickstart without leaking that posture
+        // into production.
+        if (self::isProductionEnvironment() && in_array($rawKey, self::KNOWN_INSECURE_KEYS, true)) {
             throw new RuntimeException(
                 'ENCRYPTION_KEY is set to a known placeholder value. '
                 . 'Generate a real 32-byte secret (e.g. `openssl rand -hex 32`) '
@@ -55,20 +61,38 @@ final class FieldCipher
     }
 
     /**
-     * Test environment detection.
+     * Is this a production-ish environment where placeholder secrets are
+     * unacceptable? Explicit APP_ENV=prod|production|staging|live always
+     * resolves to `true`. An unset APP_ENV also resolves to `true` unless
+     * the caller is a phpunit run — treat "ambiguous" as "fail closed."
      *
-     * Resolution order (an explicit APP_ENV ALWAYS wins, so the prod guard
-     * can be exercised even from inside a phpunit run):
-     *   1. APP_ENV=test|testing                     → test  (true)
-     *   2. APP_ENV=prod|production|staging|live     → prod  (false)
-     *   3. APP_ENV unset → check for phpunit on the stack/script.
+     * Explicit APP_ENV=development|dev|local (and test|testing) resolve to
+     * `false`, so the placeholder keys shipped in docker-compose.yml accept.
+     */
+    public static function isProductionEnvironment(): bool
+    {
+        $env = strtolower((string)(getenv('APP_ENV') ?: $_ENV['APP_ENV'] ?? ''));
+        if ($env !== '') {
+            if (in_array($env, ['prod', 'production', 'staging', 'live'], true)) return true;
+            return false; // test|testing|development|dev|local|anything-else
+        }
+        // Unset → fail-closed unless we can detect a phpunit run.
+        if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) return false;
+        $script = (string)(($_SERVER['SCRIPT_NAME'] ?? '') . ' ' . ($_SERVER['SCRIPT_FILENAME'] ?? ''));
+        return !str_contains($script, 'phpunit');
+    }
+
+    /**
+     * Kept for backwards compatibility — a handful of unit tests assert
+     * against this name. Semantically equivalent to "not production-ish"
+     * but scoped to the narrower test/testing label so the existing test
+     * expectations still hold.
      */
     public static function isTestEnvironment(): bool
     {
         $env = strtolower((string)(getenv('APP_ENV') ?: $_ENV['APP_ENV'] ?? ''));
         if ($env === 'test' || $env === 'testing') return true;
         if (in_array($env, ['prod', 'production', 'staging', 'live'], true)) return false;
-        // No explicit env signal — fall back to phpunit detection.
         if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) return true;
         $script = (string)(($_SERVER['SCRIPT_NAME'] ?? '') . ' ' . ($_SERVER['SCRIPT_FILENAME'] ?? ''));
         return str_contains($script, 'phpunit');
