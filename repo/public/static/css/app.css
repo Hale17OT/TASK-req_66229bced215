@@ -1,0 +1,58 @@
+/* Studio console — overrides on top of Layui */
+
+body { background: #f5f7fb; }
+
+.studio-login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.studio-login-card {
+  width: 420px;
+  max-width: 92vw;
+  box-shadow: 0 10px 40px rgba(0,0,0,.07);
+}
+
+.studio-login-card .layui-card-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.studio-login-card .muted { color: #888; font-size: 12px; margin: 4px 0 0; }
+
+.login-error {
+  color: #c0392b;
+  margin: 8px 0 0;
+  min-height: 18px;
+  font-size: 13px;
+}
+
+/* Shell layout */
+.studio-shell .layui-logo {
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.studio-shell .layui-side .layui-nav-item a { color: #c2c2c2; }
+.studio-shell .layui-side .layui-nav-item.layui-this > a { color: #fff; }
+
+/* Tables / forms */
+.studio-toolbar { padding: 12px 0; display: flex; gap: 8px; align-items: center; }
+.studio-toolbar .grow { flex: 1; }
+
+.degraded-banner {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #f39c12; color: #fff;
+  text-align: center; padding: 6px 12px;
+  z-index: 9999; font-size: 13px;
+}
+.degraded-banner.on { display: block; }
+
+.money { font-variant-numeric: tabular-nums; }
+.muted { color: #888; }
+.kbd { font-family: ui-monospace, Menlo, Consolas, monospace; }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Studio Operations Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="layui-layout layui-layout-admin studio-shell">
+  <div class="layui-header">
+    <div class="layui-logo layui-bg-black">Studio Console</div>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item">
+        <a href="javascript:;" id="who"></a>
+        <dl class="layui-nav-child">
+          <dd><a href="#sessions" data-route="sessions">My sessions</a></dd>
+          <dd><a href="#change-password" data-route="change-password">Change password</a></dd>
+          <dd><a href="javascript:;" id="signout">Sign out</a></dd>
+        </dl>
+      </li>
+    </ul>
+  </div>
+  <div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+      <ul class="layui-nav layui-nav-tree" lay-filter="navtree" id="nav"></ul>
+    </div>
+  </div>
+  <div class="layui-body" style="overflow:auto;">
+    <div id="page-root" style="padding: 16px;">
+      <div class="layui-card">
+        <div class="layui-card-header">Welcome</div>
+        <div class="layui-card-body">
+          <p class="muted">Pick a section from the left to get started.</p>
+          <p class="muted">Permissions: <span id="perms" class="kbd"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="layui-footer">Studio Operations Console — offline build</div>
+</div>
+
+<script src="/static/layui/layui.js"></script>
+<script src="/static/js/api.js"></script>
+<script src="/static/js/shell.js"></script>
+</body>
+</html>

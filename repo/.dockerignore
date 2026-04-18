@@ -1,0 +1,17 @@
+.git
+.gitignore
+.idea
+.vscode
+.data
+runtime
+storage/attachments
+storage/exports
+storage/tmp
+node_modules
+*.log
+coverage
+phpunit.xml
+.phpunit.result.cache
+README.md
+docs
+tests/_output

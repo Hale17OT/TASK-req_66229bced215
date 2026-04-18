@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Studio Operations Console — Sign in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="studio-login-body">
+  <div class="studio-login-card layui-card">
+    <div class="layui-card-header">
+      <h2>Studio Operations Console</h2>
+      <p class="muted">Local sign-in</p>
+    </div>
+    <div class="layui-card-body">
+      <form class="layui-form" lay-filter="loginForm">
+        <div class="layui-form-item">
+          <label class="layui-form-label">Username</label>
+          <div class="layui-input-block">
+            <input type="text" name="username" required lay-verify="required"
+                   autocomplete="username" placeholder="username"
+                   class="layui-input" autofocus>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">Password</label>
+          <div class="layui-input-block">
+            <input type="password" name="password" required lay-verify="required"
+                   autocomplete="current-password" placeholder="password"
+                   class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="login">
+              Sign in
+            </button>
+          </div>
+        </div>
+      </form>
+      <p id="login-msg" class="login-error"></p>
+    </div>
+  </div>
+
+  <script src="/static/layui/layui.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script>
+    layui.use(['form', 'layer'], function () {
+      var form = layui.form, layer = layui.layer;
+      form.on('submit(login)', function (data) {
+        document.getElementById('login-msg').textContent = '';
+        StudioApi.post('/api/v1/auth/login', data.field).then(function (res) {
+          if (res.code === 0) {
+            window.location.href = '/pages/shell.html';
+          } else {
+            document.getElementById('login-msg').textContent = res.message || 'Sign in failed.';
+          }
+        }).catch(function (err) {
+          document.getElementById('login-msg').textContent =
+            (err && err.message) || 'Network error — sign in failed.';
+        });
+        return false;
+      });
+    });
+  </script>
+</body>
+</html>

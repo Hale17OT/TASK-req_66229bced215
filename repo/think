@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+// +----------------------------------------------------------------------
+// | ThinkPHP console entry — `php think <command>`
+// +----------------------------------------------------------------------
+
+namespace think;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$console = (new App())->console;
+
+$console->run();

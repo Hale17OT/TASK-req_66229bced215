@@ -1,0 +1,53 @@
+# --- PHP / Composer ---
+/vendor/
+
+# --- ThinkPHP runtime (caches, compiled templates, app logs) ---
+/runtime/
+/runtime/**
+
+# --- Local environment ---
+.env
+.env.local
+
+# --- Storage (attachments + exports — back up separately, not via git) ---
+/storage/attachments/
+/storage/exports/
+/storage/tmp/
+# keep the directory shape so the app boots with empty volumes
+!/storage/attachments/.gitkeep
+!/storage/exports/.gitkeep
+!/storage/tmp/.gitkeep
+
+# --- Docker volumes mounted into the repo ---
+/.data/
+/docker/mysql/data/
+
+# --- Vendored Layui dist (fetched at Docker build) ---
+/public/static/layui/
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+/logs/
+
+# --- Test artifacts ---
+/coverage/
+.phpunit.result.cache
+phpunit.xml
+
+# --- Temporary build / scratch ---
+/tmp/
+/scratch/
+
+# --- OS / Editors ---
+*.bak
+*.tmp
+*~

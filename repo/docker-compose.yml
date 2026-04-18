@@ -1,0 +1,112 @@
+name: studio-console
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: studio-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-studio_console}
+      MYSQL_USER: ${MYSQL_USER:-studio}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-studio_change_me}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=caching_sha2_password
+      - --sql-mode=STRICT_ALL_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+      - --innodb-flush-log-at-trx-commit=1
+      - --max_allowed_packet=64M
+      - --log-bin-trust-function-creators=1
+      - --max-connections=500
+    ports:
+      - "${DB_HOST_PORT:-3306}:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root_change_me}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: studio-app
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_TIMEZONE: ${APP_TIMEZONE:-America/New_York}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-studio_console}
+      DB_USER: ${MYSQL_USER:-studio}
+      DB_PASS: ${MYSQL_PASSWORD:-studio_change_me}
+      # APP_KEY / ENCRYPTION_KEY intentionally have NO fallback. The app
+      # container refuses to boot if they are missing so operators can't
+      # silently ship a placeholder. See README.md quick-start for the
+      # one-line key generator.
+      APP_KEY: ${APP_KEY:?set APP_KEY in .env (openssl rand -hex 32)}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env (openssl rand -hex 32)}
+    volumes:
+      - ./:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-runtime:/var/www/html/runtime
+      - app-storage:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "9000"
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: studio-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_HOST_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public:ro
+    depends_on:
+      - app
+
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: studio-migrate
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-studio_console}
+      DB_USER: ${MYSQL_USER:-studio}
+      DB_PASS: ${MYSQL_PASSWORD:-studio_change_me}
+    volumes:
+      - ./:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-runtime:/var/www/html/runtime
+      - app-storage:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh","-lc"]
+    command:
+      - |
+        echo '--- waiting for db ---'
+        until php -r "new PDO('mysql:host=db;port=3306;dbname='.getenv('DB_NAME'), getenv('DB_USER'), getenv('DB_PASS'));" 2>/dev/null; do sleep 1; done
+        echo '--- running migrations ---'
+        php think migrate:run || exit 1
+        echo '--- running seed ---'
+        php think db:seed || exit 1
+        echo 'DONE'
+    restart: "no"
+
+volumes:
+  db-data:
+  app-runtime:
+  app-storage:
+  app-vendor:

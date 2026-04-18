@@ -1,0 +1,22 @@
+<?php
+return [
+    'pathinfo_depr'      => '/',
+    'url_html_suffix'    => '',
+    'url_common_param'   => true,
+    'url_param_type'     => 0,
+    'route_check_cache'  => false,
+    'request_cache'      => false,
+    'request_cache_expire' => null,
+    'request_cache_except' => [],
+    'request_cache_tag'    => '',
+    'default_route'      => 'index/index',
+    'route_annotation'   => false,
+    'controller_layer'   => 'controller',
+    'empty_controller'   => 'Error',
+    'use_action_prefix'  => false,
+    'controller_suffix'  => '',
+    'action_suffix'      => '',
+    'url_route_must'     => true,
+    'url_lazy_route'     => false,
+    'url_route_on'       => true,
+];
