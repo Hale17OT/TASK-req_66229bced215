@@ -370,7 +370,8 @@ class Audit5FindingsApiTest extends ApiTestCase
             'status'               => 'draft',
         ]);
         // Seed two live attachments + one soft-deleted one; the count must
-        // report 2, not 3.
+        // report 2, not 3. Individual inserts because insertAll() requires
+        // every row to carry the same column set.
         $base = [
             'reimbursement_id'    => $rid,
             'uploaded_by_user_id' => 1,
@@ -378,11 +379,16 @@ class Audit5FindingsApiTest extends ApiTestCase
             'size_bytes'          => 10,
             'storage_path'        => 'x',
         ];
-        Db::table('reimbursement_attachments')->insertAll([
-            ['file_name' => 'a.pdf', 'sha256' => str_repeat('a', 64)] + $base,
-            ['file_name' => 'b.pdf', 'sha256' => str_repeat('b', 64)] + $base,
-            ['file_name' => 'c.pdf', 'sha256' => str_repeat('c', 64), 'deleted_at' => '2026-04-12 00:00:00'] + $base,
-        ]);
+        Db::table('reimbursement_attachments')->insert(
+            ['file_name' => 'a.pdf', 'sha256' => str_repeat('a', 64)] + $base
+        );
+        Db::table('reimbursement_attachments')->insert(
+            ['file_name' => 'b.pdf', 'sha256' => str_repeat('b', 64)] + $base
+        );
+        Db::table('reimbursement_attachments')->insert(
+            ['file_name' => 'c.pdf', 'sha256' => str_repeat('c', 64),
+             'deleted_at' => '2026-04-12 00:00:00'] + $base
+        );
         $this->loginAs('admin');
         $res = $this->request('GET', "/api/v1/reimbursements/{$rid}");
         $this->assertStatus(200, $res);
