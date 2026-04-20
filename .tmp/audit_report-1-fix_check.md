@@ -45,9 +45,6 @@ Static-only reinspection completed for the 6 issues you listed (no project run, 
   - Decision actions now use idempotent retries:
     - `public/static/js/pages/reimbursements.js:123`
     - `public/static/js/pages/settlements.js:41`
-  - Documentation updated for adaptive polling + idempotent decisions:
-    - `ASSUMPTIONS.md:153`
-    - `ASSUMPTIONS.md:162`
 - Boundary: real behavior under packet loss remains **Manual Verification Required** under static-only rules.
 
 ### 5) Medium — Audit before/after evidence incomplete for permission/rule changes
@@ -66,12 +63,22 @@ Static-only reinspection completed for the 6 issues you listed (no project run, 
 ### 6) Medium — Static documentation verifiability inconsistencies
 - Status: **Fixed**
 - Evidence:
-  - Export behavior documented as synchronous and matches implementation:
-    - `ASSUMPTIONS.md:132`
-    - `app/service/export/ExportService.php:12`
-  - README now points to an existing coverage mapping artifact:
-    - `README.md:195` (now references `docs/coverage_report.md`)
-    - `docs/coverage_report.md:1` (file exists)
+  - Stale README references to documentation artifacts that are not present in
+    the repository have been **removed** (not replaced with new files). The
+    audit flagged README citations to `ASSUMPTIONS.md`,
+    `DEFINITION_OF_DONE.md`, and `docs/coverage_report.md`; none of those files
+    exist in the delivered repo, and the README no longer references them.
+  - README no longer cites missing artifacts:
+    - `repo/README.md` (grep for `ASSUMPTIONS|DEFINITION_OF_DONE|coverage_report` returns zero matches)
+  - Stale in-code comments referencing `ASSUMPTIONS.md` were also scrubbed:
+    - `repo/app/service/auth/Authorization.php` (comment block above `applyAuditScope`, no `ASSUMPTIONS.md` citation)
+    - `repo/app/service/auth/ScopeFilter.php` (class-level docblock, no `ASSUMPTIONS.md` citation)
+  - Export behavior is still documented by the implementation itself:
+    - `repo/app/service/export/ExportService.php:12`
+- Boundary: this resolution intentionally closes the finding by *removing* the
+  broken references rather than creating new documentation artifacts. Any
+  future reviewer looking for `ASSUMPTIONS.md` or `docs/coverage_report.md`
+  will not find them — that is the expected state.
 
 ## Final Conclusion
 - Based on static evidence, all six previously reported issues are now addressed.

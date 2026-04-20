@@ -7,7 +7,7 @@ Static inspection scope:
 
 ## Backend Endpoint Inventory
 
-Resolved API endpoints (prefixes and nested groups included): **75** from `route/api.php:15-134`.
+Resolved API endpoints (prefixes and nested groups included): **78** from `route/api.php:15-144`.
 
 Non-API web routes (excluded from API denominator):
 - `GET /` (`route/web.php:6`)
@@ -44,6 +44,8 @@ Legend:
 | `POST /api/v1/admin/locations` | yes | true no-mock HTTP | `tests/api/LocationDepartmentApiTest.php` | `test_post_location_creates_new_row` |
 | `GET /api/v1/admin/departments` | yes | true no-mock HTTP | `tests/api/LocationDepartmentApiTest.php` | `test_get_departments_returns_seeded_rows` |
 | `POST /api/v1/admin/departments` | yes | true no-mock HTTP | `tests/api/LocationDepartmentApiTest.php` | `test_post_department_creates_new_row` |
+| `GET /api/v1/locations` | yes | true no-mock HTTP | `tests/api/Audit3FindingsApiTest.php` | `test_scope_aware_locations_endpoint_returns_only_in_scope`, `test_scope_aware_locations_endpoint_returns_all_for_global` |
+| `GET /api/v1/departments` | yes | true no-mock HTTP | `tests/api/Audit3FindingsApiTest.php` | `test_scope_aware_departments_endpoint_works` |
 | `GET /api/v1/attendance/records` | yes | true no-mock HTTP | `tests/api/AttendanceApiTest.php` | `test_get_records_returns_paginated_list_for_admin` |
 | `POST /api/v1/attendance/records` | yes | true no-mock HTTP | `tests/api/AttendanceApiTest.php` | `test_post_records_creates_row_and_writes_audit` |
 | `GET /api/v1/attendance/corrections` | yes | true no-mock HTTP | `tests/api/AttendanceCorrectionApiTest.php` | `test_get_corrections_lists_rows` |
@@ -74,6 +76,7 @@ Legend:
 | `GET /api/v1/budget/precheck` | yes | true no-mock HTTP | `tests/api/BudgetApiTest.php` | `test_get_precheck_returns_within_cap` |
 | `GET /api/v1/reimbursements` | yes | true no-mock HTTP | `tests/api/ReimbursementApiTest.php` | `test_index_returns_paginated` |
 | `POST /api/v1/reimbursements` | yes | true no-mock HTTP | `tests/api/ReimbursementApiTest.php` | `test_post_creates_draft` |
+| `GET /api/v1/reimbursements/duplicate-check` | yes | true no-mock HTTP | `tests/api/Audit5FindingsApiTest.php` | `test_duplicate_check_returns_ok_when_no_conflict`, `test_duplicate_check_flags_reserved_receipt`, `test_duplicate_check_requires_core_fields`, `test_duplicate_check_requires_reimbursement_permission` |
 | `POST /api/v1/reimbursements/:id/submit` | yes | true no-mock HTTP | `tests/api/ReimbursementApiTest.php` | `test_submit_advances_status_and_freezes_commitment` |
 | `POST /api/v1/reimbursements/:id/withdraw` | yes | true no-mock HTTP | `tests/api/ReimbursementApiTest.php` | `test_withdraw_releases_freeze` |
 | `POST /api/v1/reimbursements/:id/approve` | yes | true no-mock HTTP | `tests/api/ReimbursementApiTest.php` | `test_approve_advances_to_settlement_pending` |
@@ -120,13 +123,13 @@ Search scope: `tests/**/*.php`.
 
 ## Coverage Summary
 
-- Total API endpoints: **75** (`route/api.php:15-134`).
-- Endpoints with HTTP tests: **75**.
-- Endpoints with TRUE no-mock tests: **75**.
+- Total API endpoints: **78** (`route/api.php:15-144`).
+- Endpoints with HTTP tests: **78**.
+- Endpoints with TRUE no-mock tests: **78**.
 
 Computed metrics:
-- HTTP coverage = **100.00%** (75/75)
-- True API coverage = **100.00%** (75/75)
+- HTTP coverage = **100.00%** (78/78)
+- True API coverage = **100.00%** (78/78)
 
 ## Unit Test Summary
 
@@ -203,7 +206,7 @@ Inspection target: `README.md` at repository root.
 
 | Gate | Result | Evidence |
 |---|---|---|
-| `repo/README.md` exists | PASS | `README.md` exists at root |
+| `repo/README.md` exists | PASS | File present at `repo/README.md` (verified by directory listing of `repo/`) |
 | Markdown formatting/readability | PASS | Structured headings/tables/code blocks throughout `README.md:1-248` |
 | Backend/fullstack startup includes `docker-compose up` | PASS | Literal command present at `README.md:15` |
 | Access method (URL + port) | PASS | `http://localhost:8080` at `README.md:22` |
